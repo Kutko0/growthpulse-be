@@ -5,14 +5,12 @@ namespace Api.Database;
 
 public class StartupContext : DbContext
 {
-    public DbSet<Startup> Startup { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public StartupContext(DbContextOptions<StartupContext> options) : base(options)
     {
-        // Fill in your own.
-        optionsBuilder.UseMySQL("server=;database=;user=;password=");
     }
     
+    
+    public DbSet<Startup> Startup { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

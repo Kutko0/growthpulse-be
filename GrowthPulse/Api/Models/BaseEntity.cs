@@ -2,7 +2,8 @@
 
 namespace Api.Models;
 
-public class Startup : BaseEntity
+public class BaseEntity
 {
-    public string Name { get; set; }
+    [Key]
+    public int Id { get; set; }
 }
