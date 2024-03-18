@@ -1,4 +1,5 @@
 using Api.Database;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,9 @@ string mySqlConnectionString = builder.Configuration.GetConnectionString("mysql"
 builder.Services.AddDbContext<StartupContext>(options => options
     .UseMySql(mySqlConnectionString, ServerVersion.AutoDetect(mySqlConnectionString)));
 
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<StartupContext>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,6 +31,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
