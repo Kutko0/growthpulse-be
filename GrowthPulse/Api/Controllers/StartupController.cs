@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Controllers;
 
-
 [ApiController]
 [Route("startup")]
 public class StartupController : ControllerBase
@@ -23,7 +22,7 @@ public class StartupController : ControllerBase
     {
         return await _context.Startup.ToListAsync();
     }
-    
+
     [HttpGet("{id}")]
     public async Task<ActionResult<Startup>> GetStartup(int id)
     {
@@ -36,14 +35,14 @@ public class StartupController : ControllerBase
 
         return startup;
     }
-    
+
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutStartup(int id, StartupDTO startupDTO)
+    public async Task<IActionResult> PutStartup(int id, StartupDTO startupDto)
     {
         if (!StartupExists(id)) return NotFound();
         var startup = await _context.Startup.FindAsync(id);
 
-        startup!.Name = startupDTO.Name;
+        startup!.Name = startupDto.Name;
 
         _context.Entry(startup).State = EntityState.Modified;
 
@@ -65,7 +64,7 @@ public class StartupController : ControllerBase
 
         return NoContent();
     }
-    
+
     [HttpPost]
     public async Task<ActionResult<Startup>> PostStartup(StartupDTO startupDTO)
     {
@@ -78,12 +77,12 @@ public class StartupController : ControllerBase
 
         return CreatedAtAction(nameof(GetStartup), new { id = startupEntity.Id }, startupEntity);
     }
-    
+
     private bool StartupExists(int id)
     {
         return _context.Startup.Any(e => e.Id == id);
     }
-    
+
     [HttpPost("InsertTestData")]
     public void InsertData()
     {
