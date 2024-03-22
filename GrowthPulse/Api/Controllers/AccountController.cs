@@ -1,8 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Api.Helpers;
 using Api.Models;
 using Api.Models.Auth;
+using Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -13,15 +15,18 @@ namespace Api.Controllers;
 [Route("auth")]
 public class AccountController : ControllerBase
 {
+    private readonly IEmailService _emailService;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IConfiguration _configuration;
 
     public AccountController(
+        IEmailService emailService,
         UserManager<IdentityUser> userManager,
         RoleManager<IdentityRole> roleManager,
         IConfiguration configuration)
     {
+        _emailService = emailService;
         _userManager = userManager;
         _roleManager = roleManager;
         _configuration = configuration;
@@ -85,7 +90,36 @@ public class AccountController : ControllerBase
                 new Response
                     { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
+        var resultVerification = await SendVerificationEmail(user);
+
+        if (!resultVerification.Success)
+        {
+            throw new Exception("Failed to send an email");
+        }
+
         return Ok(new Response { Status = "Success", Message = "User created successfully!" });
+    }
+
+    [HttpPost]
+    [Route("verify-email")]
+    public async Task<Result> VerifyEmail([FromBody] EmailVerifyModel model)
+    {
+        var currentUser = await _userManager.FindByEmailAsync(model.Email);
+
+        if (null == currentUser)
+        {
+            return Result.Fail("User with specified email address not found.");
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(currentUser, model.VerificationCode);
+
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(x => x.Description);
+            return Result.Fail(errors);
+        }
+
+        return Result.Succeed();
     }
 
     private JwtSecurityToken GetToken(List<Claim> authClaims)
@@ -101,5 +135,13 @@ public class AccountController : ControllerBase
         );
 
         return token;
+    }
+
+    private async Task<Result> SendVerificationEmail(IdentityUser user)
+    {
+        var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var message = $"Your verification code is {verificationToken}";
+
+        return await _emailService.SendEmail(user.Email, "GrowthPulse verification code", message);
     }
 }

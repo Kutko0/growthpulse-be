@@ -1,5 +1,7 @@
 using System.Text;
 using Api.Database;
+using Api.Helpers;
+using Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,28 +12,39 @@ ConfigurationManager configuration = builder.Configuration;
 
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Swagger, development API explorer
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+// Initialize custom services
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 string mySqlConnectionString = builder.Configuration.GetConnectionString("mysql");
 
 // Database Logic
 builder.Services.AddDbContext<StartupContext>(options => options
     .UseMySql(mySqlConnectionString, ServerVersion.AutoDetect(mySqlConnectionString)));
-
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+// User Accounts
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = true;
+        options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider;
+    })
     .AddEntityFrameworkStores<StartupContext>()
     .AddDefaultTokenProviders();
 
+// Email configuration
+var emailConfig = configuration
+    .GetSection("EmailConfiguration")
+    .Get<EmailConfiguration>();
+builder.Services.AddSingleton(emailConfig);
+
+// Authentication
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        
     }).AddGoogle(googleOptions =>
     {
         googleOptions.ClientId = configuration["Google:ClientId"];
