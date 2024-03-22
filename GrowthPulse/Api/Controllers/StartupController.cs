@@ -1,5 +1,6 @@
 ﻿using Api.Database;
 using Api.Models;
+using Api.Models.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

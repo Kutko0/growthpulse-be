@@ -1,4 +1,4 @@
-﻿namespace Api.Models;
+﻿namespace Api.Models.Auth;
 
 public class StartupDTO
 {
