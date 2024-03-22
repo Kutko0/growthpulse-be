@@ -31,6 +31,11 @@ builder.Services.AddAuthentication(options =>
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        
+    }).AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = configuration["Google:ClientId"];
+        googleOptions.ClientSecret = configuration["Google:ClientSecret"];
     })
 
 // Adding Jwt Bearer
@@ -47,6 +52,7 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
         };
     });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
