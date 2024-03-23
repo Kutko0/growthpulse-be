@@ -1,5 +1,9 @@
 ﻿# The GrowthPulse application
 ## Development notes
+
+Install dotnet CLI for Linux here:
+[MSC Docs](https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual)
+
 To run the application, use the standard dotnet run command.  
 Example: From the git repository root, run the following:  
 `dotnet run GrowthPulse/Api/Program.cs`
